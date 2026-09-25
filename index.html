@@ -25,7 +25,7 @@
       background-color: #ffffff;
       border: 4px solid #1a82e2;
       width: 100%;
-      max-width: 800px;
+      max-width: 850px;
       padding: 30px 20px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       display: flex;
@@ -41,52 +41,16 @@
       text-align: center;
     }
 
-    .add-player-box {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 15px;
-    }
-
-    .add-player-box input {
-      flex: 1;
-      padding: 10px 15px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-      outline: none;
-    }
-
-    .add-player-box input:focus {
-      border-color: #1a82e2;
-    }
-
-    .btn-add {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.2s;
-    }
-
-    .btn-add:hover {
-      background-color: #218838;
-    }
-
     .board {
       background-color: #d9d9d9;
       width: 100%;
-      max-width: 700px;
       min-height: 320px;
       padding: 25px 20px;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
+      border-radius: 4px;
     }
 
-    /* Grid layout for selection page */
+    /* Grid layout */
     .player-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -97,10 +61,10 @@
       background-color: #be4343;
       color: white;
       border-radius: 25px;
-      padding: 10px 12px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      position: relative;
       cursor: pointer;
       user-select: none;
       transition: transform 0.1s, background-color 0.2s;
@@ -135,36 +99,80 @@
     }
 
     .player-name {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       flex: 1;
       text-align: center;
+      padding-right: 10px;
     }
 
+    /* ปุ่มลบแบบซ่อนเนียนๆ ด้านขวา */
     .btn-delete {
-      color: #ffcccc;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.6);
       font-size: 12px;
       cursor: pointer;
-      padding: 0 4px;
-      margin-left: 4px;
+      padding: 2px 4px;
+      border-radius: 50%;
     }
 
     .btn-delete:hover {
       color: #ffffff;
-      font-weight: bold;
+      background-color: rgba(0,0,0,0.2);
+    }
+
+    /* กล่องเพิ่มชื่อผู้เล่น */
+    .add-player-box {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 450px;
+      margin-bottom: 20px;
+    }
+
+    .add-player-box input {
+      flex: 1;
+      padding: 8px 15px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .add-player-box input:focus {
+      border-color: #1a82e2;
+    }
+
+    .btn-add {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover {
+      background-color: #218838;
     }
 
     /* Split Team Layout */
     .team-split {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-around;
       width: 100%;
     }
 
     .team-column {
-      width: 45%;
+      width: 40%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -190,7 +198,7 @@
       border-radius: 25px;
       padding: 10px 15px;
       width: 100%;
-      max-width: 180px;
+      max-width: 200px;
       text-align: center;
       font-size: 1rem;
       white-space: nowrap;
@@ -223,7 +231,7 @@
       display: none !important;
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 768px) {
       .player-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -237,16 +245,16 @@
 
     <!-- หน้าที่ 1: หน้าเลือกผู้เล่น -->
     <div id="page-selection" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-      
-      <!-- ช่องเพิ่มผู้เล่น -->
+      <div class="board">
+        <div class="player-grid" id="player-grid"></div>
+      </div>
+
+      <!-- ช่องเพิ่มผู้เล่นอยู่ด้านล่างกรอบเทา -->
       <div class="add-player-box">
         <input type="text" id="new-player-input" placeholder="พิมพ์ชื่อผู้เล่นใหม่..." onkeypress="handleKeyPress(event)">
         <button class="btn-add" onclick="addPlayer()">+ เพิ่มคน</button>
       </div>
 
-      <div class="board">
-        <div class="player-grid" id="player-grid"></div>
-      </div>
       <button class="btn-action" onclick="startRandom()">สุ่มเลยอิอิ</button>
     </div>
 
@@ -272,7 +280,6 @@
   </div>
 
   <script>
-    // รายชื่อผู้เล่นเริ่มต้น
     const defaultPlayers = [
       "Kobe", "เกษตรกรมอง HEE", "Cosmic", "degujeff",
       "FllUKsY1", "I miss hee", "ผมชอบเกาเหลา", "มดแดงทรงนง",
@@ -282,7 +289,6 @@
 
     let players = [];
 
-    // โหลดข้อมูลจาก LocalStorage
     function loadPlayers() {
       const saved = localStorage.getItem('custom_players_data');
       if (saved) {
@@ -293,7 +299,6 @@
       }
     }
 
-    // เซฟข้อมูลลง LocalStorage
     function savePlayers() {
       localStorage.setItem('custom_players_data', JSON.stringify(players));
     }
@@ -419,7 +424,6 @@
       shuffleAndDisplay(selectedPlayers);
     }
 
-    // โหลดครั้งแรกเมื่อเปิดหน้าเว็บ
     loadPlayers();
     renderPlayers();
   </script>
