@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เว็บสุ่มห้ำหั่นสุดโหด</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f7f9fc;
+        }
+
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Custom pill button style matching screenshot */
+        .player-pill {
+            background-color: #c84444;
+            color: white;
+            transition: all 0.2s ease-in-out;
+        }
+        .player-pill:hover {
+            background-color: #b33838;
+            transform: translateY(-1px);
+        }
+        .player-pill.unselected {
+            background-color: #a87272;
+            opacity: 0.85;
+        }
+
+        /* Custom Checkbox Design */
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            background-color: #d1d5db;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .checked .custom-checkbox {
+            background-color: #ffffff;
+        }
+        .checked .custom-checkbox::after {
+            content: '✓';
+            color: #c84444;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Gray action button style */
+        .btn-action {
+            background-color: #d8d8d8;
+            color: #2b2b2b;
+            transition: all 0.2s;
+        }
+        .btn-action:hover:not(:disabled) {
+            background-color: #c4c4c4;
+            transform: translateY(-1px);
+        }
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Subtle animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center py-8 px-4 text-gray-800">
+
+    <div class="w-full max-w-4xl mx-auto flex flex-col items-center">
+        <!-- Main Header Title -->
+        <h1 class="text-4xl md:text-5xl font-normal text-center mb-6 tracking-wide text-gray-900">
+            เว็บสุ่มห้ำหั่นสุดโหด
+        </h1>
+
+        <!-- Content Container Frame -->
+        <div class="w-full bg-[#d8d8d8] rounded-2xl p-6 sm:p-10 shadow-inner min-h-[420px] flex flex-col justify-center">
+
+            <!-- PAGE 1: PLAYER SELECTION PAGE -->
+            <div id="selection-page" class="fade-in w-full">
+                <!-- Selection Counter Header -->
+                <div class="flex flex-wrap justify-between items-center mb-6 px-2">
+                    <span class="text-lg md:text-xl font-medium text-gray-700">
+                        เลือกผู้เล่น <span id="selected-count" class="font-bold text-red-600 text-2xl">0</span> / <span id="max-count">10</span> คน
+                    </span>
+                    <div class="flex gap-2 mt-2 sm:mt-0">
+                        <button onclick="selectAll10()" class="text-sm bg-white/80 hover:bg-white px-3 py-1.5 rounded-lg shadow-sm text-gray-700 font-medium transition">
+                            เลือก 10 คนแรก
+                        </button>
+                        <button onclick="deselectAll()" class="text-sm bg-white/80 hover:bg-white px-3 py-1.5 rounded-lg shadow-sm text-gray-700 font-medium transition">
+                            ล้างทั้งหมด
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Player Grid (4 columns on desktop matching screenshot) -->
+                <div id="player-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <!-- Dynamic player pills will be inserted here -->
+                </div>
+
+                <!-- Custom Player Input -->
+                <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-400/30">
+                    <input type="text" id="new-player-input" placeholder="เพิ่มชื่อผู้เล่นใหม่..." 
+                        class="flex-grow px-4 py-2 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-red-500 bg-white/90">
+                    <button onclick="addCustomPlayer()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-xl font-medium transition shadow-sm">
+                        + เพิ่มผู้เล่น
+                    </button>
+                </div>
+            </div>
+
+            <!-- PAGE 2: RESULT TEAM DISPLAY PAGE -->
+            <div id="result-page" class="hidden fade-in w-full">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 py-4">
+                    
+                    <!-- Left Team Column -->
+                    <div class="flex flex-col items-center">
+                        <h2 class="text-3xl md:text-4xl font-normal text-gray-900 mb-6 tracking-wide">
+                            ซ้าย
+                        </h2>
+                        <div id="left-team-list" class="w-full max-w-xs flex flex-col gap-3.5">
+                            <!-- Left Team Player Pills -->
+                        </div>
+                    </div>
+
+                    <!-- Right Team Column -->
+                    <div class="flex flex-col items-center">
+                        <h2 class="text-3xl md:text-4xl font-normal text-gray-900 mb-6 tracking-wide">
+                            ขวา
+                        </h2>
+                        <div id="right-team-list" class="w-full max-w-xs flex flex-col gap-3.5">
+                            <!-- Right Team Player Pills -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Page 1 Controls -->
+        <div id="selection-controls" class="mt-8 flex justify-center w-full">
+            <button id="randomize-btn" onclick="startRandomize()" disabled 
+                class="btn-action text-2xl md:text-3xl px-10 py-3 rounded-full shadow-md font-normal min-w-[220px]">
+                สุ่มเลยอิอิ
+            </button>
+        </div>
+
+        <!-- Page 2 Controls -->
+        <div id="result-controls" class="hidden mt-8 flex flex-wrap justify-center gap-6 sm:gap-10 w-full">
+            <button onclick="backToSelection()" 
+                class="btn-action text-2xl md:text-3xl px-8 py-3 rounded-full shadow-md font-normal min-w-[200px]">
+                สุ่มใหม่เลย
+            </button>
+            <button onclick="reshuffleTeams()" 
+                class="btn-action text-2xl md:text-3xl px-8 py-3 rounded-full shadow-md font-normal min-w-[200px]">
+                สุ่มใหม่หมด
+            </button>
+        </div>
+
+        <!-- Toast / Notification Modal -->
+        <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 text-base">
+            <span id="toast-message">แจ้งเตือน</span>
+        </div>
+    </div>
+
+    <script>
+        // Default initial player list from the provided image
+        const DEFAULT_PLAYERS = [
+            "Kobe", "เกษตรกรมอง HEE", "Cosmic", "degujeff",
+            "FllUKsY1", "I miss hee", "ผมชอบเกาเหลา", "มดแดงทรนง",
+            "สงครามปากกาขาขาด", "หมากกระจาย", "เทพเจทรเปาโซเบโซ", "เมกะมายเมโทโชตEE",
+            "แทงแมงมอม", "르블랑", "โซบอสไล เบอร์แปด", "David Beckham"
+        ];
+
+        // App State
+        let playerList = [...DEFAULT_PLAYERS];
+        let selectedPlayers = new Set(["Kobe", "เกษตรกรมอง HEE", "Cosmic", "degujeff", "FllUKsY1", "I miss hee", "ผมชอบเกาเหลา", "มดแดงทรนง", "สงครามปากกาขาขาด", "หมากกระจาย"]); // default select first 10
+        let teamLeft = [];
+        let teamRight = [];
+
+        const MAX_SELECTION = 10;
+
+        // Initialize App
+        window.onload = function() {
+            renderPlayerGrid();
+            updateSelectionUI();
+
+            // Enable Enter key for player input
+            document.getElementById('new-player-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCustomPlayer();
+                }
+            });
+        };
+
+        function renderPlayerGrid() {
+            const grid = document.getElementById('player-grid');
+            grid.innerHTML = '';
+
+            playerList.forEach((player, index) => {
+                const isSelected = selectedPlayers.has(player);
+                
+                const pill = document.createElement('div');
+                pill.className = `player-pill flex items-center gap-3 px-4 py-3 rounded-full cursor-pointer select-none shadow-sm ${isSelected ? 'checked' : 'unselected'}`;
+                pill.onclick = () => togglePlayerSelection(player);
+
+                pill.innerHTML = `
+                    <div class="custom-checkbox flex-shrink-0"></div>
+                    <span class="truncate text-base font-medium leading-tight flex-grow">${escapeHtml(player)}</span>
+                `;
+
+                grid.appendChild(pill);
+            });
+        }
+
+        function updateSelectionUI() {
+            const count = selectedPlayers.size;
+            document.getElementById('selected-count').textContent = count;
+            document.getElementById('max-count').textContent = MAX_SELECTION;
+
+            const randomizeBtn = document.getElementById('randomize-btn');
+            if (count === MAX_SELECTION) {
+                randomizeBtn.disabled = false;
+                randomizeBtn.classList.remove('opacity-50');
+            } else {
+                randomizeBtn.disabled = true;
+            }
+        }
+
+        function togglePlayerSelection(player) {
+            if (selectedPlayers.has(player)) {
+                selectedPlayers.delete(player);
+            } else {
+                if (selectedPlayers.size >= MAX_SELECTION) {
+                    showToast(`เลือกได้สูงสุด ${MAX_SELECTION} คนเท่านั้นครับ!`);
+                    return;
+                }
+                selectedPlayers.add(player);
+            }
+            renderPlayerGrid();
+            updateSelectionUI();
+        }
+
+        function selectAll10() {
+            selectedPlayers.clear();
+            const first10 = playerList.slice(0, MAX_SELECTION);
+            first10.forEach(p => selectedPlayers.add(p));
+            renderPlayerGrid();
+            updateSelectionUI();
+        }
+
+        function deselectAll() {
+            selectedPlayers.clear();
+            renderPlayerGrid();
+            updateSelectionUI();
+        }
+
+        function addCustomPlayer() {
+            const input = document.getElementById('new-player-input');
+            const name = input.value.trim();
+
+            if (!name) return;
+
+            if (playerList.includes(name)) {
+                showToast('มีชื่อผู้เล่นนี้อยู่ในรายการแล้ว');
+                return;
+            }
+
+            playerList.push(name);
+            if (selectedPlayers.size < MAX_SELECTION) {
+                selectedPlayers.add(name);
+            }
+
+            input.value = '';
+            renderPlayerGrid();
+            updateSelectionUI();
+            showToast(`เพิ่ม "${name}" สำเร็จ`);
+        }
+
+        function startRandomize() {
+            if (selectedPlayers.size !== MAX_SELECTION) {
+                showToast(`กรุณาเลือกผู้เล่นให้ครบ ${MAX_SELECTION} คนก่อนสุ่ม`);
+                return;
+            }
+
+            reshuffleTeams();
+
+            // Switch view
+            document.getElementById('selection-page').classList.add('hidden');
+            document.getElementById('selection-controls').classList.add('hidden');
+            
+            document.getElementById('result-page').classList.remove('hidden');
+            document.getElementById('result-controls').classList.remove('hidden');
+        }
+
+        function reshuffleTeams() {
+            const selectedArray = Array.from(selectedPlayers);
+            // Fisher-Yates Shuffle Algorithm
+            for (let i = selectedArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [selectedArray[i], selectedArray[j]] = [selectedArray[j], selectedArray[i]];
+            }
+
+            // Divide into 5 vs 5
+            teamLeft = selectedArray.slice(0, 5);
+            teamRight = selectedArray.slice(5, 10);
+
+            renderTeamResults();
+        }
+
+        function renderTeamResults() {
+            const leftContainer = document.getElementById('left-team-list');
+            const rightContainer = document.getElementById('right-team-list');
+
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+
+            teamLeft.forEach(player => {
+                leftContainer.appendChild(createResultPill(player));
+            });
+
+            teamRight.forEach(player => {
+                rightContainer.appendChild(createResultPill(player));
+            });
+        }
+
+        function createResultPill(name) {
+            const div = document.createElement('div');
+            div.className = 'player-pill text-center py-3 px-6 rounded-full text-base sm:text-lg font-medium truncate shadow-sm';
+            div.textContent = name;
+            return div;
+        }
+
+        function backToSelection() {
+            // Return to page 1 preserving previous selections
+            document.getElementById('result-page').classList.add('hidden');
+            document.getElementById('result-controls').classList.add('hidden');
+            
+            document.getElementById('selection-page').classList.remove('hidden');
+            document.getElementById('selection-controls').classList.remove('hidden');
+
+            renderPlayerGrid();
+            updateSelectionUI();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
