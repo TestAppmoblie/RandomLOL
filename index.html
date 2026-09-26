@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เว็บสุ่มห้ำหั่นสุดโหด</title>
+    <title>เว็บสุ่มตัดเพื่อนสุดโหด</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -94,7 +94,7 @@
     <div class="w-full max-w-4xl mx-auto flex flex-col items-center">
         <!-- Main Header Title -->
         <h1 class="text-4xl md:text-5xl font-normal text-center mb-6 tracking-wide text-gray-900">
-            เว็บสุ่มห้ำหั่นสุดโหด
+            เว็บสุ่มตัดเพื่อนสุดโหด
         </h1>
 
         <!-- Content Container Frame -->
@@ -105,7 +105,7 @@
                 <!-- Selection Counter Header -->
                 <div class="flex flex-wrap justify-between items-center mb-6 px-2">
                     <span class="text-lg md:text-xl font-medium text-gray-700">
-                        เลือกผู้เล่น <span id="selected-count" class="font-bold text-red-600 text-2xl">0</span> / <span id="max-count">10</span> คน
+                        เลือกผู้เล่น <span id="selected-count" class="font-bold text-red-600 text-2xl">0</span> / สูงสุด <span id="max-count">10</span> คน
                     </span>
                     <div class="flex gap-2 mt-2 sm:mt-0">
                         <button onclick="selectAll10()" class="text-sm bg-white/80 hover:bg-white px-3 py-1.5 rounded-lg shadow-sm text-gray-700 font-medium transition">
@@ -165,7 +165,7 @@
         <div id="selection-controls" class="mt-8 flex justify-center w-full">
             <button id="randomize-btn" onclick="startRandomize()" disabled 
                 class="btn-action text-2xl md:text-3xl px-10 py-3 rounded-full shadow-md font-normal min-w-[220px]">
-                เรามาตัดเพื่อนกันเถอะ
+                สุ่มเลยอิอิ
             </button>
         </div>
 
@@ -188,7 +188,7 @@
     </div>
 
     <script>
-        // Default initial player list from the provided image
+        // Default initial player list
         const DEFAULT_PLAYERS = [
             "르블랑", "เกษตรกรมอง HEE", "โซบอสซไล เบอร์แปด", "degujeff",
             "รำวงมาตรฐาน", "I miss hee", "เมกะมายเมโทโชตEE", "มดแดงทรนง",
@@ -198,11 +198,12 @@
 
         // App State
         let playerList = [...DEFAULT_PLAYERS];
-        let selectedPlayers = new Set(["르블랑", "เกษตรกรมอง HEE", "โซบอสซไล เบอร์แปด", "degujeff", "รำวงมาตรฐาน", "I miss hee", "เมกะมายเมโทโชตEE", "มดแดงทรนง", "เทพเจทเรปาโซเบโซ", "David Beckham"]); // default select first 10
+        let selectedPlayers = new Set(["르블랑", "เกษตรกรมอง HEE", "โซบอสซไล เบอร์แปด", "degujeff", "รำวงมาตรฐาน", "I miss hee", "เมกะมายเมโทโชตEE", "มดแดงทรนง", "เทพเจทเรปาโซเบโซ", "David Beckham"]); 
         let teamLeft = [];
         let teamRight = [];
 
         const MAX_SELECTION = 10;
+        const MIN_SELECTION = 2; // ยอมรับตั้งแต่ 2 คนขึ้นไป (เช่น 8 คน หรือ 10 คน)
 
         // Initialize App
         window.onload = function() {
@@ -221,7 +222,7 @@
             const grid = document.getElementById('player-grid');
             grid.innerHTML = '';
 
-            playerList.forEach((player, index) => {
+            playerList.forEach((player) => {
                 const isSelected = selectedPlayers.has(player);
                 
                 const pill = document.createElement('div');
@@ -243,7 +244,9 @@
             document.getElementById('max-count').textContent = MAX_SELECTION;
 
             const randomizeBtn = document.getElementById('randomize-btn');
-            if (count === MAX_SELECTION) {
+            
+            // แก้ไข: เปิดให้กดสุ่มได้หากเลือกผู้เล่นตั้งแต่ 2 ถึง 10 คน (เช่น 8 คน)
+            if (count >= MIN_SELECTION && count <= MAX_SELECTION) {
                 randomizeBtn.disabled = false;
                 randomizeBtn.classList.remove('opacity-50');
             } else {
@@ -302,8 +305,8 @@
         }
 
         function startRandomize() {
-            if (selectedPlayers.size !== MAX_SELECTION) {
-                showToast(`กรุณาเลือกผู้เล่นให้ครบ ${MAX_SELECTION} คนก่อนสุ่ม`);
+            if (selectedPlayers.size < MIN_SELECTION) {
+                showToast(`กรุณาเลือกผู้เล่นอย่างน้อย ${MIN_SELECTION} คน`);
                 return;
             }
 
@@ -319,15 +322,17 @@
 
         function reshuffleTeams() {
             const selectedArray = Array.from(selectedPlayers);
+            
             // Fisher-Yates Shuffle Algorithm
             for (let i = selectedArray.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [selectedArray[i], selectedArray[j]] = [selectedArray[j], selectedArray[i]];
             }
 
-            // Divide into 5 vs 5
-            teamLeft = selectedArray.slice(0, 5);
-            teamRight = selectedArray.slice(5, 10);
+            // แก้ไข: แบ่งผู้เล่นครึ่งหนึ่งเป็นทีมซ้าย-ขวา ตามจำนวนที่เลือกจริง
+            const halfLength = Math.ceil(selectedArray.length / 2);
+            teamLeft = selectedArray.slice(0, halfLength);
+            teamRight = selectedArray.slice(halfLength);
 
             renderTeamResults();
         }
